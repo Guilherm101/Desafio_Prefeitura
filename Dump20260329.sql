@@ -72,7 +72,7 @@ CREATE TABLE `pessoas` (
 
 LOCK TABLES `pessoas` WRITE;
 /*!40000 ALTER TABLE `pessoas` DISABLE KEYS */;
-INSERT INTO `pessoas` VALUES (1,'Jamal Neto da Silva','0000-00-00','15717112169','M','995690156','jamal154prof@yahoocom','2026-03-25 01:03:50'),(2,'Nicole dos Reis Schults','1964-05-04','04528974793','F','991163789','nicolereisprofissional@gmail.com','2026-03-25 01:22:16'),(3,'Irineu Osorio Jesus','1998-06-05','53926782904','M','992748661','iri47@gmail.com','2026-03-25 02:28:53'),(4,'Jucemara Silvav Bragancia','1954-02-17','09420647093','F','79453455','jucontato@hotmail.com','2026-03-25 02:34:03');
+INSERT INTO `pessoas` VALUES (1,'Jamal Neto da Silva','1978-10-23','15717112169','M','995690156','jamal154prof@yahoo.com','2026-03-25 01:03:50'),(2,'Nicole dos Reis Schults','1964-05-04','04528974793','F','991163789','nicolereisprofissional@gmail.com','2026-03-25 01:22:16'),(3,'Irineu Osorio Jesus','1998-06-05','53926782904','M','992748661','iri47@gmail.com','2026-03-25 02:28:53'),(4,'Jucemara Silvav Bragancia','1954-02-17','09420647093','F','79453455','jucontato@hotmail.com','2026-03-25 02:34:03');
 /*!40000 ALTER TABLE `pessoas` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
