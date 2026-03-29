@@ -1,0 +1,120 @@
+CRUD Pessoas (pessoas.php)
+<?php
+$host = 'localhost'; $user = 'root'; $pass = ''; $db = 'iptu_sao_leopoldo';
+$pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+
+$action = $_POST['action'] ?? '';
+$id = $_POST['id'] ?? 0;
+
+if ($action == 'create') {
+    $stmt = $pdo->prepare("INSERT INTO pessoas (nome, data_nascimento, cpf, sexo, telefone, email) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$_POST['nome'], $_POST['data_nascimento'], $_POST['cpf'], $_POST['sexo'], $_POST['telefone'] ?? '', $_POST['email'] ?? '']);
+    echo "Pessoa cadastrada!";
+}
+
+if ($action == 'read') {
+    $stmt = $pdo->query("SELECT * FROM pessoas ORDER BY id DESC");
+    $pessoas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($pessoas);
+}
+
+if ($action == 'update') {
+    $stmt = $pdo->prepare("UPDATE pessoas SET nome=?, data_nascimento=?, cpf=?, sexo=?, telefone=?, email=? WHERE id=?");
+    $stmt->execute([$_POST['nome'], $_POST['data_nascimento'], $_POST['cpf'], $_POST['sexo'], $_POST['telefone'] ?? '', $_POST['email'] ?? '', $id]);
+    echo "Atualizado!";
+}
+
+if ($action == 'delete') {
+    $stmt = $pdo->prepare("DELETE FROM pessoas WHERE id=?");
+    $stmt->execute([$id]);
+    echo "Excluído!";
+}
+?>
+CRUD Imóveis (imoveis.php)
+<?php
+
+$action = $_POST['action'] ?? '';
+$id = $_POST['id'] ?? 0;
+
+if ($action == 'create') {
+    $stmt = $pdo->prepare("INSERT INTO imoveis (logradouro, numero, bairro, complemento, id_contribuinte) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$_POST['logradouro'], $_POST['numero'], $_POST['bairro'], $_POST['complemento'] ?? '', $_POST['id_contribuinte']]);
+    echo "Imóvel cadastrado!";
+}
+
+if ($action == 'read') {
+    $stmt = $pdo->query("SELECT i.*, p.nome AS proprietario FROM imoveis i JOIN pessoas p ON i.id_contribuinte = p.id ORDER BY inscricao_municipal DESC");
+    $imoveis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($imoveis);
+}
+
+if ($action == 'update') {
+    $stmt = $pdo->prepare("UPDATE imoveis SET logradouro=?, numero=?, bairro=?, complemento=?, id_contribuinte=? WHERE inscricao_municipal=?");
+    $stmt->execute([$_POST['logradouro'], $_POST['numero'], $_POST['bairro'], $_POST['complemento'] ?? '', $_POST['id_contribuinte'], $id]);
+    echo "Atualizado!";
+}
+
+if ($action == 'delete') {
+    $stmt = $pdo->prepare("DELETE FROM imoveis WHERE inscricao_municipal=?");
+    $stmt->execute([$id]);
+    echo "Excluído!";
+}
+
+if ($action == 'list_pessoas') {
+    $stmt = $pdo->query("SELECT id, nome FROM pessoas");
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+?>
+Interface Web (index.html - Use com JS/AJAX)
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><title>Sistema IPTU São Leopoldo</title></head>
+<body>
+    <h1>Cadastro Pessoas</h1>
+    <form id="formPessoa">
+        Nome: <input type="text" name="nome" required><br>
+        Data Nascimento: <input type="date" name="data_nascimento" required><br>
+        CPF: <input type="text" name="cpf" required pattern="d{11}"><br>
+        Sexo: <select name="sexo" required><option>M</option><option>F</option><option>O</option></select><br>
+        Telefone: <input type="text" name="telefone"><br>
+        Email: <input type="email" name="email"><br>
+        <button type="submit">Cadastrar</button>
+    </form>
+    <button onclick="consultar('pessoas')">Consultar Pessoas</button>
+
+    <h1>Cadastro Imóveis</h1>
+    <form id="formImovel">
+        Logradouro: <input type="text" name="logradouro" required><br>
+        Número: <input type="text" name="numero" required><br>
+        Bairro: <input type="text" name="bairro" required><br>
+        Complemento: <input type="text" name="complemento"><br>
+        Contribuinte: <select name="id_contribuinte" required id="selectPessoas"></select><br>
+        <button type="submit">Cadastrar</button>
+    </form>
+    <button onclick="consultar('imoveis')">Consultar Imóveis</button>
+
+    <div id="resultado"></div>
+
+    <script>
+    async function ajax(url, data) {
+        const res = await fetch(url, {method: 'POST', body: new FormData(data || new FormData())});
+        return res.text();
+    }
+    document.getElementById('formPessoa').onsubmit = async (e) => {
+        e.preventDefault(); document.getElementById('resultado').innerHTML = await ajax('pessoas.php', e.target);
+    };
+
+    async function consultar(tipo) {
+        const res = await ajax(`${tipo}.php`, new FormData().append('action', 'read'));
+        document.getElementById('resultado').innerHTML = '<pre>' + res + '</pre>';
+    }
+    // Carregar pessoas no select
+    ajax('imoveis.php', new FormData().append('action', 'list_pessoas')).then(pessoas => {
+        const select = document.getElementById('selectPessoas');
+        JSON.parse(pessoas).forEach(p => {
+            select.innerHTML += `<option value="${p.id}">${p.nome}</option>`;
+        });
+    });
+    </script>
+</body>
+</html>
